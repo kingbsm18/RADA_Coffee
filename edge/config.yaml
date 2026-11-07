@@ -1,0 +1,17 @@
+site_id: "00000000-0000-0000-0000-000000000000"
+camera:
+  name: handover-cam
+  rtsp_uri_env: RTSP_URI      # secret comes from env, never from git
+  fps_sample: 5
+zone:
+  polygon: []                  # configured on site
+  direction: in_to_out
+detector:
+  backend: onnx                # onnx | tensorrt
+  model_path: models/yolo.onnx
+  confidence_min: 0.4
+tracker:
+  type: bytetrack
+transport:
+  backend_url: http://localhost:8000
+  outbox_path: ./outbox.db
