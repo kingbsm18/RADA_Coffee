@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone, tzinfo
 from decimal import Decimal
 
 import pytest
@@ -87,3 +87,50 @@ def test_site_settings_mapping_is_frozen() -> None:
 def test_sale_record_still_rejects_float_price() -> None:
     with pytest.raises(TypeError, match="Decimal"):
         SaleRecord("cafe-01", "s1", TS, "coffee", 1, 25.0, "paid")  # type: ignore[arg-type]
+
+
+def test_sale_record_quantity_cap() -> None:
+    SaleRecord("cafe-01", "s1", TS, "coffee", 100, Decimal("25"), "paid")
+    with pytest.raises(ValueError, match="cannot exceed"):
+        SaleRecord("cafe-01", "s1", TS, "coffee", 101, Decimal("25"), "paid")
+
+
+class _NoOffset(tzinfo):
+    def utcoffset(self, dt):  # type: ignore[override]
+        return None
+
+    def dst(self, dt):  # type: ignore[override]
+        return None
+
+    def tzname(self, dt):  # type: ignore[override]
+        return None
+
+
+def test_sale_record_rejects_timezone_without_offset() -> None:
+    bad = datetime(2026, 11, 5, 10, 0, tzinfo=_NoOffset())
+    with pytest.raises(ValueError, match="timezone-aware"):
+        SaleRecord("cafe-01", "s1", bad, "coffee", 1, Decimal("25"), "paid")
+
+
+def test_sale_record_rejects_bool_and_float_quantity() -> None:
+    with pytest.raises(TypeError, match="integer"):
+        SaleRecord("cafe-01", "s1", TS, "coffee", True, Decimal("25"), "paid")  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="integer"):
+        SaleRecord("cafe-01", "s1", TS, "coffee", 1.0, Decimal("25"), "paid")  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize("price", [Decimal("NaN"), Decimal("Infinity")])
+def test_sale_record_rejects_non_finite_price(price: Decimal) -> None:
+    with pytest.raises(ValueError, match="finite"):
+        SaleRecord("cafe-01", "s1", TS, "coffee", 1, price, "paid")
+
+
+@pytest.mark.parametrize("field", ["site_id", "external_id", "category"])
+def test_sale_record_rejects_blank_identifiers(field: str) -> None:
+    data = dict(
+        site_id="cafe-01", external_id="s1", timestamp=TS, category="coffee",
+        quantity=1, unit_price=Decimal("25"), status="paid",
+    )
+    data[field] = "  "
+    with pytest.raises(ValueError, match="cannot be empty"):
+        SaleRecord(**data)  # type: ignore[arg-type]

@@ -29,6 +29,9 @@ DetectionState = Literal[
 # Absolute ceiling for any lookback/grace window (business rules, section 2).
 MAX_WINDOW = timedelta(minutes=30)
 
+# Guard against a corrupt POS row expanding into a huge number of credits.
+MAX_SALE_QUANTITY = 100
+
 
 def _require_aware(name: str, value: datetime) -> None:
     if value.tzinfo is None or value.utcoffset() is None:
@@ -63,6 +66,8 @@ class SaleRecord:
             raise TypeError("quantity must be an integer")
         if self.quantity <= 0:
             raise ValueError("quantity must be positive")
+        if self.quantity > MAX_SALE_QUANTITY:
+            raise ValueError(f"quantity cannot exceed {MAX_SALE_QUANTITY}")
         if not isinstance(self.unit_price, Decimal):
             raise TypeError("unit_price must be Decimal; float is not accepted")
         if not self.unit_price.is_finite():

@@ -7,6 +7,7 @@ does not match, consume, expire, or persist them.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable
 from datetime import timezone
 from uuid import NAMESPACE_URL, uuid5
@@ -15,8 +16,15 @@ from app.engine.types import Credit, SaleRecord
 
 
 def _credit_id(site_id: str, sale_id: str, unit_index: int) -> str:
-    """Return a stable ID so replaying the same POS input is idempotent."""
-    identity = f"rada-credit:{site_id}:{sale_id}:{unit_index}"
+    """Return a stable ID so replaying the same POS input is idempotent.
+
+    The identity is serialized as a JSON array rather than joined with a
+    separator, so ids that contain ``:`` can never collide
+    (``"a"`` + ``"b:1"`` vs ``"a:b"`` + ``"1"``).
+    """
+    identity = json.dumps(
+        ["rada-credit", site_id, sale_id, unit_index], separators=(",", ":")
+    )
     return str(uuid5(NAMESPACE_URL, identity))
 
 

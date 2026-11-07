@@ -123,3 +123,30 @@ def test_mixed_paid_and_cancelled_sales_only_create_paid_credits() -> None:
     ])
     assert len(credits) == 2
     assert {credit.sale_id for credit in credits} == {"paid"}
+
+
+def test_credit_ids_cannot_collide_when_ids_contain_separators() -> None:
+    credits = build_credits(
+        [
+            sale(site_id="a", external_id="b:1"),
+            sale(site_id="a:b", external_id="1"),
+        ]
+    )
+
+    assert len({credit.credit_id for credit in credits}) == 2
+
+
+def test_same_external_id_on_different_sites_is_not_a_duplicate() -> None:
+    credits = build_credits(
+        [
+            sale(site_id="cafe-01", external_id="1001"),
+            sale(site_id="cafe-02", external_id="1001"),
+        ]
+    )
+
+    assert len(credits) == 2
+
+
+def test_corrupt_huge_quantity_is_rejected_before_expanding_credits() -> None:
+    with pytest.raises(ValueError, match="cannot exceed"):
+        sale(quantity=1_000_000)
