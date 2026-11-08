@@ -1,2 +1,263 @@
 # TODO: scenarios (calm, rush, ambiguous, void, refund)
-scenarios: []
+# RADA AI simulator scenarios
+# All timestamps are UTC.
+# Bounding boxes use normalized xyxy coordinates.
+
+scenarios:
+
+  # One coffee is handed over and one paid POS item exists.
+  calm:
+    site_id: cafe-demo
+    camera:
+      id: sim-camera-01
+    model_version: simulator-1.0
+    start_at: "2026-11-09T12:00:00Z"
+    frame_width: 1280
+    frame_height: 720
+    fps: 5
+
+    zone:
+      name: handover
+      direction: in_to_out
+      anchor: bottom_center
+      polygon:
+        - [0.20, 0.20]
+        - [0.80, 0.20]
+        - [0.80, 0.70]
+        - [0.20, 0.70]
+
+    frames:
+      - detections:
+          - bbox: [0.40, 0.35, 0.60, 0.55]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.96
+
+      - detections:
+          - bbox: [0.40, 0.45, 0.60, 0.65]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.96
+
+      - detections:
+          - bbox: [0.40, 0.55, 0.60, 0.75]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.95
+
+    pos_sales:
+      - external_id: sim-calm-001
+        timestamp: "2026-11-09T11:59:30Z"
+        product_name: Espresso
+        pos_category: coffee
+        quantity: 1
+        unit_price: "15.00"
+        status: paid
+
+
+  # Two products are handed over in a short period.
+  # Only one POS credit exists: the backend can test a category discrepancy.
+  rush:
+    site_id: cafe-demo
+    camera:
+      id: sim-camera-01
+    model_version: simulator-1.0
+    start_at: "2026-11-09T13:00:00Z"
+    frame_width: 1280
+    frame_height: 720
+    fps: 5
+
+    zone:
+      name: handover
+      direction: in_to_out
+      anchor: bottom_center
+      polygon:
+        - [0.20, 0.20]
+        - [0.80, 0.20]
+        - [0.80, 0.70]
+        - [0.20, 0.70]
+
+    frames:
+      - detections:
+          - bbox: [0.25, 0.35, 0.40, 0.55]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.96
+          - bbox: [0.60, 0.35, 0.75, 0.55]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.94
+
+      - detections:
+          - bbox: [0.25, 0.45, 0.40, 0.65]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.96
+          - bbox: [0.60, 0.45, 0.75, 0.65]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.94
+
+      - detections:
+          - bbox: [0.25, 0.55, 0.40, 0.75]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.96
+          - bbox: [0.60, 0.55, 0.75, 0.75]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.94
+
+    pos_sales:
+      - external_id: sim-rush-001
+        timestamp: "2026-11-09T12:59:30Z"
+        product_name: Cappuccino
+        pos_category: coffee
+        quantity: 1
+        unit_price: "22.00"
+        status: paid
+
+
+  # One handover is detected with low confidence.
+  # The backend should eventually classify it as low_confidence
+  # when the site's confidence threshold is higher than this value.
+  ambiguous:
+    site_id: cafe-demo
+    camera:
+      id: sim-camera-01
+    model_version: simulator-1.0
+    start_at: "2026-11-09T14:00:00Z"
+    frame_width: 1280
+    frame_height: 720
+    fps: 5
+
+    zone:
+      name: handover
+      direction: in_to_out
+      anchor: bottom_center
+      polygon:
+        - [0.20, 0.20]
+        - [0.80, 0.20]
+        - [0.80, 0.70]
+        - [0.20, 0.70]
+
+    frames:
+      - detections:
+          - bbox: [0.40, 0.35, 0.60, 0.55]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.42
+
+      - detections:
+          - bbox: [0.40, 0.45, 0.60, 0.65]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.40
+
+      - detections:
+          - bbox: [0.40, 0.55, 0.60, 0.75]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.38
+
+    pos_sales: []
+
+
+  # A coffee is handed over, but its POS line is voided.
+  void:
+    site_id: cafe-demo
+    camera:
+      id: sim-camera-01
+    model_version: simulator-1.0
+    start_at: "2026-11-09T15:00:00Z"
+    frame_width: 1280
+    frame_height: 720
+    fps: 5
+
+    zone:
+      name: handover
+      direction: in_to_out
+      anchor: bottom_center
+      polygon:
+        - [0.20, 0.20]
+        - [0.80, 0.20]
+        - [0.80, 0.70]
+        - [0.20, 0.70]
+
+    frames:
+      - detections:
+          - bbox: [0.40, 0.35, 0.60, 0.55]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.97
+
+      - detections:
+          - bbox: [0.40, 0.45, 0.60, 0.65]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.97
+
+      - detections:
+          - bbox: [0.40, 0.55, 0.60, 0.75]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.97
+
+    pos_sales:
+      - external_id: sim-void-001
+        timestamp: "2026-11-09T14:59:30Z"
+        product_name: Latte
+        pos_category: coffee
+        quantity: 1
+        unit_price: "20.00"
+        status: voided
+
+
+  # A coffee is handed over, but its POS line is refunded.
+  refund:
+    site_id: cafe-demo
+    camera:
+      id: sim-camera-01
+    model_version: simulator-1.0
+    start_at: "2026-11-09T16:00:00Z"
+    frame_width: 1280
+    frame_height: 720
+    fps: 5
+
+    zone:
+      name: handover
+      direction: in_to_out
+      anchor: bottom_center
+      polygon:
+        - [0.20, 0.20]
+        - [0.80, 0.20]
+        - [0.80, 0.70]
+        - [0.20, 0.70]
+
+    frames:
+      - detections:
+          - bbox: [0.40, 0.35, 0.60, 0.55]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.97
+
+      - detections:
+          - bbox: [0.40, 0.45, 0.60, 0.65]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.97
+
+      - detections:
+          - bbox: [0.40, 0.55, 0.60, 0.75]
+            class_id: 0
+            class_name: coffee_cup
+            confidence: 0.97
+
+    pos_sales:
+      - external_id: sim-refund-001
+        timestamp: "2026-11-09T15:59:30Z"
+        product_name: Americano
+        pos_category: coffee
+        quantity: 1
+        unit_price: "18.00"
+        status: refunded
