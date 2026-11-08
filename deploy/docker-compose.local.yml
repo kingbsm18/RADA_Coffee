@@ -1,2 +1,141 @@
 # TODO: production-like setup on the café local server (no cloud)
-services: {}
+
+services:
+  # ==========================================================
+  # POSTGRESQL — LOCAL DATABASE
+  # ==========================================================
+  db:
+    image: postgres:16-alpine
+    container_name: rada-local-db
+    restart: unless-stopped
+
+    env_file:
+      - ./env/local.env
+
+    volumes:
+      - rada_local_postgres:/var/lib/postgresql/data
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+    networks:
+      - rada-local
+
+
+  # ==========================================================
+  # FASTAPI — LOCAL BACKEND
+  # ==========================================================
+  backend:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+
+    container_name: rada-local-backend
+    restart: unless-stopped
+    init: true
+
+    env_file:
+      - ./env/local.env
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    command:
+      - /bin/sh
+      - -c
+      - alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+    volumes:
+      - rada_local_snapshots:/data/snapshots
+
+    ports:
+      - "8000:8000"
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=3)"
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+    networks:
+      - rada-local
+
+
+  # ==========================================================
+  # NEXT.JS — DASHBOARD
+  # Optional until frontend implementation is complete.
+  # ==========================================================
+  frontend:
+    profiles:
+      - dashboard
+
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+
+    container_name: rada-local-frontend
+    restart: unless-stopped
+    init: true
+
+    environment:
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+
+    depends_on:
+      backend:
+        condition: service_healthy
+
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -e
+        npm run build
+        mkdir -p .next/standalone/.next/static .next/standalone/public
+        cp -R .next/static/. .next/standalone/.next/static/
+        if [ -d public ]; then
+          cp -R public/. .next/standalone/public/
+        fi
+        node .next/standalone/server.js
+
+    ports:
+      - "3000:3000"
+
+    networks:
+      - rada-local
+
+
+# ============================================================
+# NETWORKS
+# ============================================================
+networks:
+  rada-local:
+    driver: bridge
+
+
+# ============================================================
+# PERSISTENT VOLUMES
+# ============================================================
+volumes:
+  rada_local_postgres:
+  rada_local_snapshots:
