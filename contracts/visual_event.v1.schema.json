@@ -2,18 +2,72 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "visual_event.v1",
   "type": "object",
-  "required": ["schema", "event_id", "site_id", "camera_id", "timestamp", "category", "count", "confidence", "model_version"],
+  "required": [
+    "schema",
+    "event_id",
+    "site_id",
+    "camera_id",
+    "timestamp",
+    "category",
+    "count",
+    "confidence",
+    "model_version"
+  ],
   "properties": {
-    "schema": { "const": "visual_event.v1" },
-    "event_id": { "type": "string", "format": "uuid", "description": "Idempotency key" },
-    "site_id": { "type": "string", "description": "e.g. cafe-01" },
-    "camera_id": { "type": "string", "description": "e.g. cam-1" },
-    "timestamp": { "type": "string", "format": "date-time", "description": "ISO 8601 with offset; stored as UTC" },
-    "category": { "type": "string", "description": "e.g. coffee, soft_drink" },
-    "count": { "type": "integer", "minimum": 1, "description": "Number of units this event represents" },
-    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
-    "snapshot_ref": { "type": ["string", "null"] },
-    "model_version": { "type": "string" }
+    "schema": {
+      "const": "visual_event.v1"
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Idempotency key",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "site_id": {
+      "type": "string",
+      "description": "e.g. cafe-01",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+    },
+    "camera_id": {
+      "type": "string",
+      "description": "e.g. cam-1",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 with offset; stored as UTC"
+    },
+    "category": {
+      "type": "string",
+      "description": "e.g. coffee, soft_drink",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of units this event represents",
+      "maximum": 100
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "snapshot_ref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 255
+    },
+    "model_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    }
   },
   "additionalProperties": false
 }

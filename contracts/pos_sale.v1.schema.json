@@ -2,17 +2,66 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "pos_sale.v1",
   "type": "object",
-  "required": ["site_id", "external_id", "timestamp", "product_name", "pos_category", "quantity", "unit_price", "status"],
+  "required": [
+    "site_id",
+    "external_id",
+    "timestamp",
+    "product_name",
+    "pos_category",
+    "quantity",
+    "unit_price",
+    "status"
+  ],
   "properties": {
-    "site_id": { "type": "string" },
-    "external_id": { "type": "string", "description": "Unique per (site_id, external_id)" },
-    "timestamp": { "type": "string", "format": "date-time", "description": "Sale event time, never import time" },
-    "product_name": { "type": "string" },
-    "pos_category": { "type": ["string", "null"] },
-    "quantity": { "type": "integer", "minimum": 1 },
-    "unit_price": { "type": "string", "pattern": "^[0-9]+(\\.[0-9]{1,2})?$", "description": "Decimal as string, never float. 0 = free item" },
-    "status": { "type": "string", "enum": ["paid", "voided", "refunded"] },
-    "raw": { "type": "object", "description": "Original POS payload (JSONB)" }
+    "site_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$"
+    },
+    "external_id": {
+      "type": "string",
+      "description": "Unique per (site_id, external_id)",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Sale event time, never import time"
+    },
+    "product_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "pos_category": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 200
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "unit_price": {
+      "type": "string",
+      "pattern": "^[0-9]+(\\.[0-9]{1,2})?$",
+      "description": "Decimal as string, never float. 0 = free item"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "paid",
+        "voided",
+        "refunded"
+      ]
+    },
+    "raw": {
+      "type": "object",
+      "description": "Original POS payload (JSONB)"
+    }
   },
   "additionalProperties": false
 }
