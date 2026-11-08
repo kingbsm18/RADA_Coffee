@@ -11,6 +11,7 @@ from .roi import (
     RegionOfInterest,
     apply_roi,
     create_roi,
+    crop_roi,
     point_in_roi,
 )
 
@@ -22,5 +23,6 @@ __all__ = [
     "RegionOfInterest",
     "apply_roi",
     "create_roi",
+    "crop_roi",
     "point_in_roi",
 ]
