@@ -48,10 +48,10 @@ export function RevenueIntelligence({ siteId, currency, timezone }: { siteId: st
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={categories}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(240 4% 20%)" />
-                  <XAxis dataKey="category" stroke="hsl(240 5% 65%)" fontSize={12} />
-                  <YAxis allowDecimals={false} stroke="hsl(240 5% 65%)" fontSize={12} />
-                  <Tooltip contentStyle={{ background: "hsl(240 5% 11%)", border: "1px solid hsl(240 4% 20%)" }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="category" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <YAxis allowDecimals={false} stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <Tooltip contentStyle={{ background: "hsl(var(--popover))", border: "1px solid hsl(var(--border))", color: "hsl(var(--popover-foreground))" }} />
                   <Legend />
                   <Bar dataKey="cvQty" name="Détecté (caméra)" fill="#9333EA" />
                   <Bar dataKey="posQty" name="Payé (caisse)" fill="#64748b" />

@@ -1,4 +1,23 @@
-# v0 sandbox internal files
+__pycache__/
+*.pyc
+.venv/
+.env
+*.env
+!*.env.example
+node_modules/
+.next/
+*.onnx
+*.engine
+*.pt
+edge/models/*
+!edge/models/.gitkeep
+training/data/*
+!training/data/.gitkeep
+snapshots/
+.pytest_cache/
+.DS_Store
+
+# v0 sandbox internal files / Vercel (added from the v0 branch)
 __v0_runtime_loader.js
 __v0_devtools.tsx
 __v0_jsx-dev-runtime.ts
@@ -6,11 +25,4 @@ __v0_jsx-dev-runtime.ts
 .design-cache/
 .v0-trash/
 .vercel/
-
-# Environment variables
 .env*.local
-
-# Common ignores
-node_modules
-.next/
-.DS_Store
