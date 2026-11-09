@@ -1,2 +1,57 @@
-# TODO: edge device (camera processing + outbox sender)
-services: {}
+# TODO: edge device (camera processing + outbox sende
+services:
+
+  # ==========================================================
+  # RADA EDGE — CAMERA PROCESSING DEVICE
+  # ==========================================================
+  edge:
+    profiles:
+      - edge-runtime
+
+    build:
+      context: ../edge
+      dockerfile: Dockerfile
+
+    container_name: rada-edge
+    init: true
+
+    restart: "no"
+
+    env_file:
+      - ./env/edge.env
+
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+
+    # Linux host networking allows access to cameras
+    # on the café's local network.
+    network_mode: host
+
+    # Security
+    read_only: true
+
+    cap_drop:
+      - ALL
+
+    security_opt:
+      - no-new-privileges:true
+
+    tmpfs:
+      - /tmp
+
+    # Local models and persistent snapshots
+    volumes:
+      - ../edge/models:/app/models:ro
+      - rada_edge_snapshots:/data/snapshots
+
+    command:
+      - python
+      - main.py
+
+
+# ==========================================================
+# PERSISTENT STORAGE
+# ==========================================================
+volumes:
+  rada_edge_snapshots:
