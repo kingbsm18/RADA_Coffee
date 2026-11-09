@@ -1,0 +1,16 @@
+import type { Metadata } from "next";
+
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "RADA_COFFEE — Live Operations",
+  description: "Rapprochement vidéo / caisse : écarts à vérifier pour les cafés.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="fr" className="dark">
+      <body>{children}</body>
+    </html>
+  );
+}
