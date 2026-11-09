@@ -9,7 +9,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.4", "jsonschema>=4.20"]
+dev = ["pytest>=8", "httpx>=0.27", "ruff>=0.4", "jsonschema>=4.20", "pyyaml>=6"]
 s3 = ["boto3"]
 
 [build-system]
@@ -21,7 +21,7 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["."]
+pythonpath = [".", ".."]
 
 [tool.ruff]
 line-length = 100

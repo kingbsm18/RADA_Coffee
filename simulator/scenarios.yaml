@@ -1,2 +1,54 @@
-# TODO: scenarios (calm, rush, ambiguous, void, refund)
-scenarios: []
+# Scenarios replayed without a camera. `at` = minutes after the start; `sale.offset` = minutes
+# relative to the detection; `expect` = final state once every grace period has elapsed.
+# Windows used for the expectations: coffee 25 min before / 12 after, soft_drink 10 / 7,
+# confidence threshold 0.6 (the site defaults).
+defaults:
+  site_id: cafe-01
+  camera_id: cam-1
+  model_version: sim-0.1
+categories:
+  coffee: {pos_category: "Boissons chaudes", product_name: "Café", unit_price: "25.00"}
+  soft_drink: {pos_category: "Sodas", product_name: "Coca-Cola", unit_price: "18.00"}
+scenarios:
+  calm_morning:
+    description: Every served item has its sale (paid before or just after the handover).
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.92, sale: {offset: -4}, expect: matched}
+      - {at: 6, category: soft_drink, count: 1, confidence: 0.88, sale: {offset: -2}, expect: matched}
+      - {at: 15, category: coffee, count: 2, confidence: 0.9, sale: {offset: 3, quantity: 2}, expect: matched}
+  missing_sale:
+    description: One coffee is served with no sale at all, among normal sales.
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.93, sale: {offset: -3}, expect: matched}
+      - {at: 10, category: coffee, count: 1, confidence: 0.95, expect: anomaly}
+      - {at: 20, category: soft_drink, count: 1, confidence: 0.9, sale: {offset: 0}, expect: matched}
+  late_sale:
+    description: The sale is entered after the grace period; an anomaly first, auto-resolved by the end-of-service recalculation (R13).
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.9, sale: {offset: 20}, expect: anomaly}
+  stale_sale:
+    description: The only sale is older than the lookback window, so it cannot cover the item.
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.9, sale: {offset: -40}, expect: anomaly}
+  count_gap:
+    description: Three coffees detected, two sold, so one unit is missing.
+    items:
+      - {at: 0, category: coffee, count: 3, confidence: 0.9, sale: {offset: -5, quantity: 2}, expect: anomaly}
+  low_confidence:
+    description: A shaky detection without a sale is never an anomaly (R9).
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.3, expect: low_confidence}
+      - {at: 30, category: coffee, count: 1, confidence: 0.3, sale: {offset: -2}, expect: matched}
+  offered_item:
+    description: A free item entered at 0 MAD still counts as a sale.
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.9, sale: {offset: -1, price: "0.00"}, expect: matched}
+  cancelled_after_service:
+    description: The sale was voided afterwards, so the served item has no valid sale (R8).
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.9, sale: {offset: -2, status: voided}, expect: anomaly}
+  two_detections_one_sale:
+    description: Two coffees, one sale; the oldest detection takes it (one credit, one use).
+    items:
+      - {at: 0, category: coffee, count: 1, confidence: 0.9, sale: {offset: -1}, expect: matched}
+      - {at: 2, category: coffee, count: 1, confidence: 0.9, expect: anomaly}
