@@ -3,7 +3,7 @@
 Objectif : un détecteur qui sort **directement les catégories du café** (`coffee`, `soft_drink`…), pas le produit exact.
 Pas de CNN entraîné de zéro : on part d'un YOLO pré-entraîné, export final en ONNX pour `edge/`.
 
-Pipeline prévu (scripts encore vides) : `extract_frames` → `dedupe` → `split_by_day` → `train` → `evaluate` → `export_onnx`.
+Pipeline (scripts présents, non revus ni exécutés ici) : `extract_frames` → `dedupe` → `split_by_day` → `train` → `evaluate` → `export_onnx`.
 
 ## Règles
 - **Découpe par jour**, jamais au hasard : des images voisines dans train et test gonfleraient les scores.

@@ -52,9 +52,9 @@ POS ─(CSV | API)─▶ backend/ FastAPI ──▶ PostgreSQL
 `MAX_FUTURE_SKEW_SECONDS`, `FEATURE_FLAGS`. Défauts : `backend/app/config.py`.
 
 ## État d'avancement
-| Fait et testé (281 tests, PostgreSQL 16) | Présent mais non branché | À faire |
+| Fait et testé (439 tests backend, SQLite et PostgreSQL 16) | Présent mais non branché | À faire |
 |---|---|---|
-| API, auth, modèles, migration, import CSV, stockage, WebSocket, résumés, `engine/credits`, `engine/reconcile` | `engine/cancellations`, `finalize`, `loss`, `noise_baseline`, `scheduler` (ne parlent pas encore à la base) | cycle de rapprochement en base, `pricing` (R10), `edge/`, pages du frontend, scripts `training/`, purge de rétention, export PDF, adaptateur API du POS |
+| API, auth, modèles, migration, import CSV, stockage, WebSocket, résumés, `engine/credits`, `engine/reconcile` | `edge/` (détection, tracking, événements, outbox), `training/` (scripts), `simulator/`, `engine/pricing`, `cancellations`, `finalize`, `loss`, `noise_baseline`, `scheduler` : écrits côté équipe ; seuls les tests du backend sont exécutés en continu (les tests `pricing`, `loss`, `noise_baseline`… passent), `edge/` et `training/` ne sont pas testés ici | cycle de rapprochement en base (relier `reconcile`, `alert_service`, annulations R8, fin de service R13), pages du frontend, purge de rétention, export PDF, adaptateur API du POS |
 
 ## Fuseau horaire
 Le Maroc est repassé à UTC+0 le 2026-09-20. Le backend vérifie au démarrage (hors dev) que sa base de

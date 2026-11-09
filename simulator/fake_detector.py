@@ -1,83 +1,144 @@
-"""Build visual events and the matching POS sales for a scenario (no camera needed)."""
+"""Deterministic fake detector used by the RADA simulator."""
 
 from __future__ import annotations
 
-import csv
-import io
-import uuid
-from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from collections.abc import Mapping, Sequence
 from typing import Any
 
-import yaml
-
-CSV_COLUMNS = (
-    "external_id", "timestamp", "product_name", "pos_category", "quantity", "unit_price", "status",
-)
-_NAMESPACE = uuid.UUID("5f2f6f3e-9b7d-4a41-8d3e-0f3c1c1d7a11")
+from edge.detection.detector import Detection
 
 
-@dataclass(frozen=True)
-class Built:
-    events: list[dict[str, Any]]  # valid visual_event.v1 payloads
-    sales: list[dict[str, str]]  # rows with the CSV_COLUMNS keys
-    expectations: dict[str, str]  # event_id -> final state
+class FakeDetector:
+    """Generate synthetic detections from a scenario frame sequence.
 
+    Bounding boxes in scenario files use normalized xyxy coordinates
+    in the [0, 1] range. They are converted to image pixels here.
+    """
 
-def load(path: str | Path) -> dict[str, Any]:
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    def __init__(
+        self,
+        frames: Sequence[Mapping[str, Any]],
+        *,
+        default_confidence: float = 0.95,
+    ) -> None:
+        if not 0.0 <= default_confidence <= 1.0:
+            raise ValueError("default_confidence must be between 0 and 1.")
 
+        self.frames = list(frames)
+        self.default_confidence = float(default_confidence)
 
-def build(config: dict[str, Any], name: str, *, start: datetime, run_id: str = "") -> Built:
-    """Deterministic: same scenario, start and run_id give the same ids and rows."""
-    if start.tzinfo is None:
-        raise ValueError("start must be timezone-aware")
-    defaults, categories = config["defaults"], config["categories"]
-    events: list[dict[str, Any]] = []
-    sales: list[dict[str, str]] = []
-    expectations: dict[str, str] = {}
+        for frame_index, frame in enumerate(self.frames):
+            if not isinstance(frame, Mapping):
+                raise ValueError(
+                    f"Frame {frame_index} must be a mapping."
+                )
 
-    for index, item in enumerate(config["scenarios"][name]["items"]):
-        when = (start + timedelta(minutes=item["at"])).astimezone(timezone.utc)
-        event_id = str(uuid.uuid5(_NAMESPACE, f"{name}:{index}:{run_id}"))
-        events.append(
-            {
-                "schema": "visual_event.v1",
-                "event_id": event_id,
-                "site_id": defaults["site_id"],
-                "camera_id": defaults["camera_id"],
-                "timestamp": when.isoformat(),
-                "category": item["category"],
-                "count": item["count"],
-                "confidence": item["confidence"],
-                "snapshot_ref": None,
-                "model_version": defaults["model_version"],
-            }
-        )
-        expectations[event_id] = item["expect"]
+            detections = frame.get("detections", [])
 
-        sale = item.get("sale")
-        if sale is not None:
-            product = categories[item["category"]]
-            sale_time = when + timedelta(minutes=sale.get("offset", 0))
-            sales.append(
-                {
-                    "external_id": f"SIM-{name}-{index}-{run_id}".rstrip("-"),
-                    "timestamp": sale_time.isoformat(),
-                    "product_name": product["product_name"],
-                    "pos_category": product["pos_category"],
-                    "quantity": str(sale.get("quantity", item["count"])),
-                    "unit_price": str(sale.get("price", product["unit_price"])),
-                    "status": sale.get("status", "paid"),
-                }
+            if not isinstance(detections, Sequence) or isinstance(
+                detections, (str, bytes)
+            ):
+                raise ValueError(
+                    f"Frame {frame_index}: detections must be a list."
+                )
+
+    def detect(
+        self,
+        frame: Any,
+        *,
+        frame_index: int,
+    ) -> list[Detection]:
+        """Return synthetic detections for a given frame index."""
+
+        if frame is None or not hasattr(frame, "shape"):
+            raise ValueError("A valid image frame is required.")
+
+        if len(frame.shape) < 2:
+            raise ValueError("Invalid frame shape.")
+
+        height = int(frame.shape[0])
+        width = int(frame.shape[1])
+
+        if height <= 0 or width <= 0:
+            raise ValueError("Frame dimensions must be positive.")
+
+        if frame_index < 0:
+            raise ValueError("frame_index cannot be negative.")
+
+        if frame_index >= len(self.frames):
+            return []
+
+        frame_config = self.frames[frame_index]
+        raw_detections = frame_config.get("detections", [])
+
+        results: list[Detection] = []
+
+        for index, item in enumerate(raw_detections):
+            if not isinstance(item, Mapping):
+                raise ValueError(
+                    f"Frame {frame_index}, detection {index}: "
+                    "expected a mapping."
+                )
+
+            bbox = item.get("bbox")
+
+            if (
+                not isinstance(bbox, Sequence)
+                or isinstance(bbox, (str, bytes))
+                or len(bbox) != 4
+            ):
+                raise ValueError(
+                    f"Frame {frame_index}, detection {index}: "
+                    "bbox must contain [x1, y1, x2, y2]."
+                )
+
+            try:
+                x1, y1, x2, y2 = map(float, bbox)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("Bounding box coordinates must be numeric.") from exc
+
+            if not all(0.0 <= value <= 1.0 for value in (x1, y1, x2, y2)):
+                raise ValueError(
+                    "Fake detector bounding boxes must be normalized to [0, 1]."
+                )
+
+            if x2 <= x1 or y2 <= y1:
+                raise ValueError("Bounding box must have positive dimensions.")
+
+            confidence = float(
+                item.get("confidence", self.default_confidence)
             )
-    return Built(events, sales, expectations)
 
+            if not 0.0 <= confidence <= 1.0:
+                raise ValueError("Detection confidence must be in [0, 1].")
 
-def sales_csv(rows: list[dict[str, str]]) -> str:
-    buffer = io.StringIO()
-    writer = csv.DictWriter(buffer, fieldnames=CSV_COLUMNS, lineterminator="\n")
-    writer.writeheader()
-    writer.writerows(rows)
-    return buffer.getvalue()
+            class_name = str(item.get("class_name", "")).strip()
+
+            if not class_name:
+                raise ValueError("Detection class_name cannot be empty.")
+
+            class_id = item.get("class_id", 0)
+
+            if isinstance(class_id, bool) or not isinstance(class_id, int):
+                raise ValueError("Detection class_id must be an integer.")
+
+            results.append(
+                Detection(
+                    bbox=(
+                        x1 * width,
+                        y1 * height,
+                        x2 * width,
+                        y2 * height,
+                    ),
+                    confidence=confidence,
+                    class_id=class_id,
+                    class_name=class_name,
+                )
+            )
+
+        return results
+
+    def reset(self) -> None:
+        """Reset hook for compatibility with detector-like components."""
+
+        return None

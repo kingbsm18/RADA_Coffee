@@ -25,7 +25,7 @@ cp .env.example .env        # puis remplir les secrets
 make dev                    # compose dev : base + backend (alembic upgrade head) + frontend
 # production : alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
-Les fichiers `docker-compose.{local,edge,cloud}.yml` sont encore vides.
+Les fichiers `docker-compose.{local,edge,cloud}.yml` existent maintenant mais n'ont **pas été testés** (pas de Docker dans l'environnement de revue).
 
 ## Exploitation
 - Sauvegarde PostgreSQL quotidienne (`pg_dump`) **et test de restauration** ; surveiller le disque (photos, logs).
