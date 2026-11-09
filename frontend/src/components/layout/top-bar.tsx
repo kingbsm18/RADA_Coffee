@@ -27,10 +27,10 @@ export function TopBar() {
   const apiOk = health.data?.status === "ready";
 
   return (
-    <header className="flex h-12 shrink-0 items-center gap-4 border-b bg-card px-4">
+    <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-white px-4 shadow-sm sm:px-6">
       <Link href="/live" className="flex items-center gap-2 font-semibold tracking-tight">
         <ScanEye className="h-5 w-5 text-primary" aria-hidden />
-        RADA_COFFEE
+        <span>RADA<span className="text-primary">.</span>COFFEE</span>
       </Link>
 
       <div className="ml-2 flex items-center gap-2">

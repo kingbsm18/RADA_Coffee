@@ -1,18 +1,16 @@
-__pycache__/
-*.pyc
-.venv/
-.env
-*.env
-!*.env.example
-node_modules/
+# v0 sandbox internal files
+__v0_runtime_loader.js
+__v0_devtools.tsx
+__v0_jsx-dev-runtime.ts
+.snowflake/
+.design-cache/
+.v0-trash/
+.vercel/
+
+# Environment variables
+.env*.local
+
+# Common ignores
+node_modules
 .next/
-*.onnx
-*.engine
-*.pt
-edge/models/*
-!edge/models/.gitkeep
-training/data/*
-!training/data/.gitkeep
-snapshots/
-.pytest_cache/
 .DS_Store

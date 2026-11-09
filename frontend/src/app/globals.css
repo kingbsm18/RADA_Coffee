@@ -4,27 +4,27 @@
 
 @layer base {
   :root {
-    /* Dark operational theme (the only theme): charcoal surfaces, purple #9333EA. */
-    --background: 240 6% 7%;
-    --foreground: 0 0% 96%;
-    --card: 240 5% 10%;
-    --card-foreground: 0 0% 96%;
-    --popover: 240 5% 11%;
-    --popover-foreground: 0 0% 96%;
+    /* Light workspace tokens with a deep charcoal navigation shell. */
+    --background: 220 20% 97%;
+    --foreground: 222 28% 14%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 28% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 28% 14%;
     --primary: 271 81% 56%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 240 4% 16%;
-    --secondary-foreground: 0 0% 96%;
-    --muted: 240 4% 14%;
-    --muted-foreground: 240 5% 65%;
-    --accent: 240 4% 18%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 72% 55%;
+    --secondary: 220 18% 94%;
+    --secondary-foreground: 222 28% 18%;
+    --muted: 220 16% 94%;
+    --muted-foreground: 220 10% 45%;
+    --accent: 271 90% 96%;
+    --accent-foreground: 271 70% 35%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --success: 152 60% 45%;
-    --warning: 38 92% 55%;
-    --border: 240 4% 20%;
-    --input: 240 4% 20%;
+    --success: 152 60% 37%;
+    --warning: 38 92% 45%;
+    --border: 220 14% 88%;
+    --input: 220 14% 84%;
     --ring: 271 81% 56%;
     --radius: 0.5rem;
   }

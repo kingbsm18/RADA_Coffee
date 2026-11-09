@@ -41,39 +41,56 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
-        <CardContent className="space-y-4 p-6">
-          <div className="flex items-center gap-2 text-lg font-semibold">
-            <ScanEye className="h-5 w-5 text-primary" aria-hidden />
-            RADA_COFFEE
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-muted/30 p-4">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -bottom-32 -right-20 h-80 w-80 rounded-full bg-primary/10 blur-3xl" aria-hidden />
+      <Card className="relative w-full max-w-md border-border/70 bg-card/95 shadow-xl shadow-primary/5 backdrop-blur">
+        <CardContent className="space-y-7 p-7 sm:p-9">
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-lg font-semibold tracking-tight">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <ScanEye className="h-5 w-5" aria-hidden />
+              </span>
+              RADA<span className="text-primary">_COFFEE</span>
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight">Bienvenue sur votre espace opérations</h1>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Surveillez vos caméras et réconciliez chaque service avec votre caisse.
+              </p>
+            </div>
           </div>
-          <div className="space-y-3" role="group" aria-label="Connexion">
-            <label className="block space-y-1 text-sm">
+          <div className="space-y-4" role="group" aria-label="Connexion">
+            <label className="block space-y-2 text-sm font-medium">
               Identifiant
-              <Input autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
+              <Input className="h-11" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} />
             </label>
-            <label className="block space-y-1 text-sm">
+            <label className="block space-y-2 text-sm font-medium">
               Mot de passe
               <Input
+                className="h-11"
                 type="password"
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && username && password && void submit()}
+                onKeyDown={(e) => {
+                  if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+                  if (e.key === "Enter" && username && password) void submit();
+                }}
               />
             </label>
             {error && (
-              <p role="alert" className="text-sm text-destructive">
+              <p role="alert" className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {error}
               </p>
             )}
-            <Button className="w-full" disabled={busy || !username || !password} onClick={() => void submit()}>
+            <Button className="h-11 w-full" disabled={busy || !username || !password} onClick={() => void submit()}>
               {busy ? "Connexion…" : "Se connecter"}
             </Button>
           </div>
+          <p className="text-center text-xs text-muted-foreground">Accès sécurisé pour les équipes RADA AI</p>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
