@@ -1,3 +1,10 @@
+# Cloud / hybrid mode. There is NO database or TLS terminator in this file:
+#  - DATABASE_URL must point to a managed PostgreSQL (see env/cloud.env.example);
+#  - ports are bound to 127.0.0.1 on purpose: put a reverse proxy with HTTPS in front
+#    (the browser dashboard cannot call an http:// API from an https:// page).
+#
+#   docker compose -f deploy/docker-compose.cloud.yml --env-file deploy/env/cloud.env up -d
+#   docker compose -f deploy/docker-compose.cloud.yml --env-file deploy/env/cloud.env --profile dashboard up -d
 services:
 
   # ==========================================================
@@ -7,6 +14,9 @@ services:
     build:
       context: ../backend
       dockerfile: Dockerfile
+      args:
+        INSTALL_DEV: "false"   # no pytest/ruff in the production image
+        INSTALL_S3: "true"     # boto3, needed when STORAGE_BACKEND=s3
 
     container_name: rada-cloud-backend
     restart: unless-stopped
@@ -17,6 +27,10 @@ services:
 
     environment:
       PYTHONUNBUFFERED: "1"
+
+    # Only used when STORAGE_BACKEND=local (photos would be lost on restart without it).
+    volumes:
+      - snapshots:/data/snapshots
 
     command:
       - /bin/sh
@@ -63,6 +77,10 @@ services:
       NODE_ENV: production
       HOSTNAME: 0.0.0.0
       PORT: 3000
+      # next.config.js only emits .next/standalone/server.js when this is set.
+      NEXT_OUTPUT: standalone
+      # Baked into the bundle by `npm run build` below; provide it via --env-file (see header).
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
 
     depends_on:
       backend:
@@ -89,8 +107,11 @@ services:
 
 
 # ==========================================================
-# NETWORKS
+# VOLUMES / NETWORKS
 # ==========================================================
+volumes:
+  snapshots:
+
 networks:
   rada-cloud:
     driver: bridge
