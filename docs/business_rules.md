@@ -125,6 +125,7 @@ Ne sont PAS des règles décidées.
 2. **R4 / R6 :** si `count = 3` et seulement 2 crédits disponibles, la détection est-elle découpée en unités
    (2 rapprochées + 1 anomalie) ou reste-t-elle un seul objet avec un état partiel ?
 3. **R11 : niveau de priorité.** Le dashboard doit regrouper par « niveau de priorité » mais aucune définition
-   n'existe. Proposition : `haute` si l'alerte est forte (R12), sinon `normale` ; ou des paliers selon la perte estimée.
+   n'existe. **Implémenté par défaut** : `haute` si l'alerte est forte (R12), sinon `normale` (champ `priority` de l'API).
+   Alternative : des paliers selon la perte estimée. À confirmer.
 4. **R11 : « perte détectée ».** Implémentation actuelle = anomalies `open` + `confirmed` (tout ce que le système a
-   signalé et que personne n'a rejeté ; `false_alarm` et `auto_resolved` exclus). Alternative : `open` seulement.
+   signalé et que personne n'a rejeté ; `false_alarm` et `auto_resolved` exclus). Alternative : `open` seulement. À confirmer.

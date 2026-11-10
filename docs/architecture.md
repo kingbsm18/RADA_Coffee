@@ -35,7 +35,7 @@ POS ─(CSV | API)─▶ backend/ FastAPI ──▶ PostgreSQL
 | Réglages | `GET/PUT /sites/{id}/settings`, `GET/PUT /sites/{id}/category-mappings` |
 | POS | `POST /sites/{id}/pos/import` (CSV), `GET /sites/{id}/pos/imports` |
 | Événements | `POST /events` (edge, idempotent), `GET /events` |
-| Alertes | `GET /alerts`, `GET/PATCH /alerts/{id}` (décision facultative : confirmed / false_alarm, R11) |
+| Alertes | `GET /alerts` (filtre `priority`), `GET /alerts/summary` (groupes site / jour / catégorie / priorité, R11), `GET/PATCH /alerts/{id}` et `POST /alerts/review` (qualifier un groupe d'un coup) : décisions **facultatives** (confirmed / false_alarm) |
 | Photos | `POST /images` (edge), `GET /sites/{id}/images`, `GET /images/{site}/{ref}` |
 | Analyses | `GET /analytics/daily`, `/daily/export.csv`, `/hourly` |
 | Temps réel | `WS /ws/alerts?site_id=…` (le jeton est le **premier message**, pas dans l'URL) |
