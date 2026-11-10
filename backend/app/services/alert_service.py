@@ -74,7 +74,10 @@ def create_alert(
 def review_alert(
     db: Session, alert: Alert, *, status: str, user: User, note: str | None = None
 ) -> Alert:
-    """The manager decides: ``confirmed`` or ``false_alarm`` (R11). Audited."""
+    """Optional human decision (R11): ``confirmed`` or ``false_alarm``. Audited.
+
+    Never required: an unreviewed alert stays ``open`` and is never confirmed or dismissed automatically.
+    """
     if status not in REVIEW_STATUSES:
         raise AlertError(f"invalid review status: {status!r}")
     if alert.status not in _REVIEWABLE_FROM:

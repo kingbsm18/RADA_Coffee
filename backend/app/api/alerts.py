@@ -70,7 +70,7 @@ def review_alert(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    """The manager decides (R11): confirmed or false_alarm."""
+    """Optional human decision (R11). Nothing requires it: unreviewed alerts simply stay open."""
     alert = _load(db, user, alert_id)
     try:
         alert = alert_service.review_alert(db, alert, status=payload.status, user=user, note=payload.note)

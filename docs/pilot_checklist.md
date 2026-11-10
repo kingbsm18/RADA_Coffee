@@ -19,7 +19,7 @@
 
 ## Go / no-go
 - [ ] Les écarts « à vérifier » dépassent nettement le bruit mesuré
-- [ ] Le gérant sait lire une alerte et trancher (confirmé / fausse alerte)
+- [ ] Le gérant sait consulter une alerte et ses photos ; la qualifier (confirmé / fausse alerte) est **facultatif** (R11)
 - [ ] Aucun discours « accusation » : l'outil signale, un humain vérifie
 
 ## Après

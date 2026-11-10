@@ -39,9 +39,24 @@ produit exact.
 - **R10.** Perte estimée = quantité manquante × prix moyen pondéré de la catégorie (ventes payées des 30
   derniers jours ; ventes à 0 MAD et annulées EXCLUES du calcul ; mis à jour chaque nuit). Fourchette =
   quantité × prix min à quantité × prix max. Montant FIGÉ dans l'alerte à sa création.
-- **R11.** Le gérant tranche : `confirmed` ou `false_alarm`. Il voit toutes les photos de la catégorie dans
-  la période (jamais une seule photo présentée comme LA preuve). Deux totaux : perte détectée et perte
-  confirmée.
+- **R11. Validation humaine facultative et gestion par exception.**
+  - La création d'une anomalie ne nécessite aucune intervention humaine. Une anomalie est enregistrée
+    automatiquement à l'expiration de `grace`.
+  - Son état initial est `anomaly`. Elle reste dans cet état tant qu'aucune décision humaine n'est prise.
+  - Le gérant n'est jamais obligé de confirmer ou de rejeter chaque anomalie.
+  - Le dashboard présente les anomalies regroupées par site, période, catégorie et niveau de priorité.
+  - Les notifications sont réservées aux écarts dépassant le seuil défini par R12. Une notification ne
+    nécessite pas d'accusé de réception pour que le moteur continue à fonctionner.
+  - Le gérant peut consulter les anomalies individuellement ou examiner un groupe d'anomalies avec les
+    photos contextuelles correspondantes.
+  - Une anomalie non examinée reste `anomaly` : elle n'est jamais automatiquement considérée comme
+    confirmée ou comme une fausse alerte.
+  - Deux indicateurs sont maintenus :
+    - Perte détectée : montant estimé des anomalies non résolues, avant validation humaine.
+    - Perte confirmée : montant des anomalies explicitement confirmées par le gérant.
+  - Les anomalies `false_alarm` sont exclues de la perte confirmée. Les anomalies `auto_resolved` sont
+    exclues du rapport officiel après recalcul R13.
+  - Toute décision humaine est horodatée et associée à l'utilisateur qui l'a prise.
 - **R12.** Niveau de bruit : mesuré en mode ombre par café ; les alertes fortes (notification) ne partent
   que si l'écart dépasse nettement ce niveau. Toutes les anomalies restent enregistrées.
 - **R13.** Recalcul de fin de service : toute anomalie dont une vente correspondante existe finalement (vente
@@ -65,6 +80,9 @@ produit exact.
 ## États d'une détection
 
 `pending`, `matched`, `low_confidence`, `anomaly`, `confirmed`, `false_alarm`, `auto_resolved`.
+
+Correspondance avec l'implémentation : une anomalie non examinée est une alerte au statut `open` (la détection
+est à l'état `anomaly`) ; `confirmed` et `false_alarm` sont les seules décisions humaines possibles.
 
 ## Valeurs de départ (à mesurer ensuite : percentile 95 du délai réel)
 
@@ -106,3 +124,7 @@ Ne sont PAS des règles décidées.
    sa fenêtre (re-rapprochement), ou devient-elle immédiatement anomalie `cancelled_after_service` ?
 2. **R4 / R6 :** si `count = 3` et seulement 2 crédits disponibles, la détection est-elle découpée en unités
    (2 rapprochées + 1 anomalie) ou reste-t-elle un seul objet avec un état partiel ?
+3. **R11 : niveau de priorité.** Le dashboard doit regrouper par « niveau de priorité » mais aucune définition
+   n'existe. Proposition : `haute` si l'alerte est forte (R12), sinon `normale` ; ou des paliers selon la perte estimée.
+4. **R11 : « perte détectée ».** Implémentation actuelle = anomalies `open` + `confirmed` (tout ce que le système a
+   signalé et que personne n'a rejeté ; `false_alarm` et `auto_resolved` exclus). Alternative : `open` seulement.
